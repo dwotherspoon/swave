@@ -13,7 +13,7 @@
 #define FOURCC_IMAP 0x70616d69
 #define FOURCC_MMAP 0x70616d6d
 #define FOURCC_free 0x65657266
-#define FOURCC_KEY  0x2a59454b
+#define FOURCC_KEYS 0x2a59454b
 #define FOURCC_PUBL 0x4c425550
 
 #define SWAP_INT16(X) ((((X) & 0xff) << 8)  |\
@@ -35,7 +35,7 @@ typedef enum {
 } endian_t;
 
 typedef struct {
-    fourcc_t id;
+    fourcc_t type;
     uint32_t length;
     uint8_t *data;
 } director_chunk_t;

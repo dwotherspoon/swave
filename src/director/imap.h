@@ -3,8 +3,7 @@
 
 #include <director/util.h>
 
-typedef struct {
-    fourcc_t id;
+typedef struct __attribute__((__packed__)) {
     uint32_t length;
     uint32_t mmap_count;
     uint32_t mmap_offset;

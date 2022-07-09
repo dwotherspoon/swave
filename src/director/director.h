@@ -6,9 +6,10 @@
 #include <director/util.h>
 #include <director/imap.h>
 #include <director/mmap.h>
+#include <director/keys.h>
 
 typedef struct {
-	FILE *fptr;
+    FILE *fptr;
     /* Offset of RIFX in source file (for EXEs etc) */
     uint32_t offset;
     /* Information from RIFX */
@@ -19,13 +20,10 @@ typedef struct {
     /* Chunks from file */
     imap_t imap;
     mmap_t mmap;
-
+    keys_t keys;
 /*
 
 	movieinfo_t info;
-	imap_t imap;
-	mmap_t mmap;
-	keys_t keys;
 	castlist_t castlist;
 	score_t score; */
 

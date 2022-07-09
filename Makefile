@@ -1,7 +1,7 @@
 CC = clang
 CFLAGS = -Wall -Wextra -Wpedantic -O0 -Isrc/
 
-OBJS =  src/main.o src/director/director.o src/director/imap.o src/director/mmap.o
+OBJS =  src/main.o src/director/director.o src/director/imap.o src/director/mmap.o src/director/keys.o
 
 EXECNAME = swave
 

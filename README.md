@@ -1,6 +1,8 @@
 SWave
 ===
 
+Expertiments in Macromedia Director files.
+
 # Resources
 - https://nosamu.medium.com/a-tour-of-the-adobe-director-file-format-e375d1e063c0
 - https://docs.google.com/document/d/1jDBXE4Wv1AEga-o1Wi8xtlNZY4K2fHxW2Xs8RgARrqk/

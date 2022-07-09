@@ -6,12 +6,12 @@ int director_load_chunk(director_chunk_t *chunk, director_t *director, uint32_t 
     size_t sz_read;
     fseek(director->fptr, offset, SEEK_SET);
 
-    sz_read = fread(chunk->id.str, 4, 1, director->fptr);
+    sz_read = fread(chunk->type.str, 4, 1, director->fptr);
     if (sz_read != 1) {
         printf("ERROR: Failed to read id of chunk.\n");
         return -1;
     }
-    chunk->id.val = director->endianess == LITTLE_ENDIAN ? SWAP_INT32(chunk->id.val) : chunk->id.val;
+    chunk->type.val = director->endianess == LITTLE_ENDIAN ? SWAP_INT32(chunk->type.val) : chunk->type.val;
 
     sz_read = fread(&chunk->length, 4, 1, director->fptr);
     if (sz_read != 1) {
@@ -20,7 +20,7 @@ int director_load_chunk(director_chunk_t *chunk, director_t *director, uint32_t 
     }
     chunk->length = director->endianess == BIG_ENDIAN ? SWAP_INT32(chunk->length) : chunk->length;
 
-    printf("Read chunk with FourCC: %.*s (%x), length: %u\n", 4, chunk->id.str, chunk->id.val, chunk->length);
+    printf("Read chunk with FourCC: %.*s (%x), length: %u\n", 4, chunk->type.str, chunk->type.val, chunk->length);
 
     chunk->data = (uint8_t*)malloc(chunk->length);
     if (chunk->data == NULL) {
@@ -42,6 +42,7 @@ director_t *director_load_file(char *fname) {
     size_t sz_read;
     director_chunk_t cur_chunk;
     director_t *result = malloc(sizeof(director_t));
+    int32_t mmap_result_id;
 
     if (result == NULL) {
         printf("ERROR: Malloc failed.\n");
@@ -86,6 +87,7 @@ director_t *director_load_file(char *fname) {
         return NULL;
     }
     imap_print(&result->imap);
+
     /* Free the loaded data */
     free(cur_chunk.data);
 
@@ -101,40 +103,35 @@ director_t *director_load_file(char *fname) {
     }
     mmap_print(&result->mmap);
     mmap_print_entries(&result->mmap);
+
     /* Free the loaded data */
     free(cur_chunk.data);
 
-    return result;
-
-
-    /* Load Key table */
-    //mmap_find_entry()
-
-/*
-    if (director_load_chunk(&cur_chunk, result, key_entry.offset) {
-        printf("ERROR: Failed to read KEY chunk.\n");
+    /* Load key table */
+    tmp.val = FOURCC_KEYS;
+    mmap_result_id = mmap_find_entry(&result->mmap, tmp, 0);
+    if (mmap_result_id == -1) {
+        printf("ERROR: Failed to find keys table in mmap.\n");
         return NULL;
     }
 
-    free(cur_chunk.data);
-*/
-    /* Dump PUBL */
-/*
-    if (mmap.publ_entry != NULL) {
-        fseek(result->fptr, mmap.publ_entry->offset, SEEK_SET);
-        if (loader_read_chunk(result->fptr, &cur_chunk, is_be) != 0) {
-            printf("ERROR: Failed to read KEY chunk.\n");
-            return NULL;
-        }
-        for (uint32_t i = 0; i < cur_chunk.len; i += 16) {
-            printf("%02x %02x %02x %02x %02x %02x %02x %02x\n",
-                    cur_chunk.data[i],  cur_chunk.data[i + 1],  cur_chunk.data[i + 2],  cur_chunk.data[i + 3],
-                    cur_chunk.data[i + 4],  cur_chunk.data[i + 5],  cur_chunk.data[i + 6],  cur_chunk.data[i + 7],
-                    cur_chunk.data[i + 8],  cur_chunk.data[i + 9],  cur_chunk.data[i + 10],  cur_chunk.data[i + 11],
-                    cur_chunk.data[i + 12],  cur_chunk.data[i + 13],  cur_chunk.data[i + 14],  cur_chunk.data[i + 15]);
-        }
+    mmap_print_entry(&result->mmap.entries[mmap_result_id]);
+
+    if (director_load_chunk(&cur_chunk, result, result->mmap.entries[mmap_result_id].offset) != 0) {
+        printf("ERROR: Failed to read keys chunk.\n");
+        return NULL;
     }
-*/
+
+    if (keys_process_chunk(&cur_chunk, &result->keys, result->endianess) != 0) {
+        printf("ERROR: Failed to process keys chunk.\n");
+        return NULL;
+    }
+
+    keys_print(&result->keys);
+    keys_print_entries(&result->keys);
+
+    /* Free the loaded data */
+    free(cur_chunk.data);
 
     return result;
 }
