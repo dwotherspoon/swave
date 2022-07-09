@@ -96,7 +96,7 @@ void mmap_print_entry(mmap_entry_t *entry) {
             "\tLength    %u\n"
             "\tOffset:   %u\n"
             "\tFlags:    %x\n"
-            "\tReserved: %x\n"
+            "\tReserved: 0x%x\n"
             "\tNext ID:  %i\n",
             4, entry->type.str, entry->length, entry->offset,
             entry->flags, entry->reserved, entry->next_id);

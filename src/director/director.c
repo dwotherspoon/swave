@@ -102,7 +102,7 @@ director_t *director_load_file(char *fname) {
         return NULL;
     }
     mmap_print(&result->mmap);
-    mmap_print_entries(&result->mmap);
+    //mmap_print_entries(&result->mmap);
 
     /* Free the loaded data */
     free(cur_chunk.data);
@@ -128,7 +128,35 @@ director_t *director_load_file(char *fname) {
     }
 
     keys_print(&result->keys);
-    keys_print_entries(&result->keys);
+    //keys_print_entries(&result->keys);
+
+    /* Free the loaded data */
+    free(cur_chunk.data);
+
+    /* Load video info */
+    tmp.val = FOURCC_VWCF;
+    mmap_result_id = mmap_find_entry(&result->mmap, tmp, 0);
+    if (mmap_result_id == -1) {
+        printf("INFO: VWCF not found, trying DRCF\n");
+        tmp.val = FOURCC_DRCF;
+    }
+    mmap_result_id = mmap_find_entry(&result->mmap, tmp, 0);
+    if (mmap_result_id == -1) {
+        printf("ERROR: Failed to find config entry (VWCF/DRCF).\n");
+        return NULL;
+    }
+
+    if (director_load_chunk(&cur_chunk, result, result->mmap.entries[mmap_result_id].offset) != 0) {
+        printf("ERROR: Failed to load config chunk.\n");
+        return NULL;
+    }
+
+    if (config_process_chunk(&cur_chunk, &result->config, result->endianess) != 0)  {
+        printf("ERROR: Faled to load config chunk.\n");
+        return NULL;
+    }
+
+    config_print(&result->config);
 
     /* Free the loaded data */
     free(cur_chunk.data);

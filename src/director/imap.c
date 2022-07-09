@@ -34,10 +34,10 @@ void imap_print(imap_t *imap) {
     printf("IMAP CHUNK INFORMATION:\n"
             "\tMMAP Count:   %u\n"
             "\tMMAP Offset:  %u\n"
-            "\tMMAP Version: 0x%08x\n"
-            "\tReserved:     0x%08x\n"
-            "\tReserved 1:   0x%08x\n"
-            "\tReserved 2:   0x%08x\n",
-            imap->mmap_count, imap->mmap_offset, imap->mmap_version,
+            "\tMMAP Version: 0x%x (v%u)\n"
+            "\tReserved:     0x%x\n"
+            "\tReserved 1:   0x%x\n"
+            "\tReserved 2:   0x%x\n",
+            imap->mmap_count, imap->mmap_offset, imap->mmap_version, util_decode_version(imap->mmap_version),
             imap->reserved, imap->reserved1, imap->reserved2);
 }

@@ -15,6 +15,8 @@
 #define FOURCC_free 0x65657266
 #define FOURCC_KEYS 0x2a59454b
 #define FOURCC_PUBL 0x4c425550
+#define FOURCC_VWCF 0x46435756
+#define FOURCC_DRCF 0x46435244 
 
 #define SWAP_INT16(X) ((((X) & 0xff) << 8)  |\
                        (((X) & 0xff00) >> 8))
@@ -39,5 +41,7 @@ typedef struct {
     uint32_t length;
     uint8_t *data;
 } director_chunk_t;
+
+uint32_t util_decode_version(uint16_t ver);
 
 #endif

@@ -7,6 +7,7 @@
 #include <director/imap.h>
 #include <director/mmap.h>
 #include <director/keys.h>
+#include <director/config.h>
 
 typedef struct {
     FILE *fptr;
@@ -21,9 +22,9 @@ typedef struct {
     imap_t imap;
     mmap_t mmap;
     keys_t keys;
+    config_t config;
 /*
 
-	movieinfo_t info;
 	castlist_t castlist;
 	score_t score; */
 
