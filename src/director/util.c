@@ -1,7 +1,7 @@
 #include <director/util.h>
 
 uint32_t util_decode_version(uint16_t ver) {
-	if (ver >= 0x79F) {
+    if (ver >= 0x79F) {
         return 1201;
     } else if (ver >= 0x783) {
 		return 1200;
@@ -31,4 +31,13 @@ uint32_t util_decode_version(uint16_t ver) {
         return 300;
     }
     return 200;
+}
+
+size_t util_read_varint(uint8_t *data, uint32_t *value) {
+    *value = 0;
+    uint8_t *ptr = data;
+    do {
+        *value = (*value << 7) | (*ptr & 0x7f);
+    } while (*ptr++ & 0x80);
+    return ptr - data;
 }

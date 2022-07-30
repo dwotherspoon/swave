@@ -8,6 +8,10 @@
 #include <director/mmap.h>
 #include <director/keys.h>
 #include <director/config.h>
+#include <director/score.h>
+
+#define INFLATE_BUF_SZ       256
+#define FCDR_MAX_DEFLATED_SZ 1024
 
 typedef struct {
     FILE *fptr;
@@ -23,6 +27,7 @@ typedef struct {
     mmap_t mmap;
     keys_t keys;
     config_t config;
+    score_t score;
 /*
 
 	castlist_t castlist;

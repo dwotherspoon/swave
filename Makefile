@@ -1,11 +1,11 @@
 CC = clang
 CFLAGS = -Wall -Wextra -Wpedantic -O0 -Isrc/
-CFLAGS += $(shell pkg-config --cflags glfw3)
-LDFLAGS = $(shell pkg-config glfw3 --libs)
+CFLAGS += $(shell pkg-config glfw3 --cflags)
+LDFLAGS = $(shell pkg-config glfw3 --libs) -lz
 
 RENDERER_OBJS = src/renderer/renderer.o
 DIRECTOR_OBJS = src/director/director.o src/director/imap.o src/director/mmap.o src/director/keys.o src/director/config.o\
-				src/director/rect.o src/director/util.o
+				src/director/rect.o src/director/util.o src/director/score.o
 GLAD_OBJS = src/glad/glad.o
 SWAVE_OBJS = src/main.o
 

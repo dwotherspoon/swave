@@ -15,6 +15,20 @@ typedef struct __attribute__((__packed__)) {
 } mmap_entry_t;
 
 typedef struct __attribute__((__packed__)) {
+    int32_t entry_id;
+    int32_t offset;
+    int32_t compressed_length;
+    int32_t uncompressed_length;
+    fourcc_t compression_type;
+    fourcc_t type;
+} abmp_entry_t;
+
+typedef union {
+    mmap_entry_t *mmap;
+    abmp_entry_t *abmp;
+} mmap_entries_t;
+
+typedef struct __attribute__((__packed__)) {
     uint32_t length;
     uint16_t properties_length;
     uint16_t entry_length;

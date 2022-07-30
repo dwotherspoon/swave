@@ -93,8 +93,8 @@ void mmap_print(mmap_t *mmap) {
 void mmap_print_entry(mmap_entry_t *entry) {
     printf("MMAP ENTRY INFORMATION:\n"
             "\tType:     %.*s\n"
-            "\tLength    %u\n"
-            "\tOffset:   %u\n"
+            "\tLength    %i\n"
+            "\tOffset:   %i\n"
             "\tFlags:    %x\n"
             "\tReserved: 0x%x\n"
             "\tNext ID:  %i\n",
