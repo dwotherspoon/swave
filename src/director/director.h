@@ -10,7 +10,7 @@
 #include <director/config.h>
 #include <director/score.h>
 
-#define INFLATE_BUF_SZ       256
+#define INFLATE_BUF_SZ       512
 #define FCDR_MAX_DEFLATED_SZ 1024
 
 typedef struct {

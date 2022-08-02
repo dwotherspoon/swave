@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <zlib.h>
+#include <string.h>
 
 int director_load_chunk(director_chunk_t *chunk, director_t *director, uint32_t offset) {
     size_t sz_read;
@@ -59,11 +60,11 @@ int director_load_compressed_chunk(director_chunk_t *chunk, director_t *director
     sz_read = fread(buf, 1, INFLATE_BUF_SZ, director->fptr);
     sz_used = util_read_varint(buf, &deflated_len); 
     sz_used += util_read_varint(buf + sz_used, &compression_type); 
-    sz_used += util_read_varint(buf + sz_used, &inflated_len); 
+    sz_used += util_read_varint(buf + sz_used, &inflated_len);
 
     printf("INFO: Deflated length: %i, compression type: %x, inflated length: %i\n", deflated_len, compression_type, inflated_len);
 
-    chunk->data = malloc(deflated_len + 100);
+    chunk->data = (uint8_t*)malloc(inflated_len);
     if (chunk->data == NULL) {
         printf("This malloc failed\n");
         return -1;
@@ -73,7 +74,7 @@ int director_load_compressed_chunk(director_chunk_t *chunk, director_t *director
     inflate_stream.zfree = Z_NULL;
     inflate_stream.opaque = Z_NULL;
 
-    inflate_stream.avail_out = inflated_len + 100;
+    inflate_stream.avail_out = inflated_len;
     inflate_stream.next_out = chunk->data;
 
     inflate_stream.avail_in = sz_read - sz_used;
@@ -92,8 +93,6 @@ int director_load_compressed_chunk(director_chunk_t *chunk, director_t *director
             inflate_stream.next_in = buf;
         }
         inflate_result = inflate(&inflate_stream, Z_NO_FLUSH);
-        printf("Inflate result = %i, avail_in %u, total_in %lu, total_out %lu\n", inflate_result, inflate_stream.avail_in, inflate_stream.total_in, inflate_stream.total_out);
-        printf("%s\n", inflate_stream.msg);
         if (inflate_result < 0) {
             return -1;
         }
@@ -101,13 +100,11 @@ int director_load_compressed_chunk(director_chunk_t *chunk, director_t *director
 
     inflateEnd(&inflate_stream);
 
+    /* Rewind for unused data */
 
-    // printf("INFO: ZLib inflated %i bytes to %i (total = %i) bytes\n", inflate_stream.total_in, inflate_stream.total_out, inflate_full_length);
-
-    /* Rewind FP by  xyz */
+    fseek(director->fptr, -sz_read + sz_used, SEEK_CUR);
 
     return 0;
-
 }
 
 int diretor_read_mmap(director_t *director) {
@@ -224,7 +221,7 @@ int director_read_abmp(director_t *director) {
     sz_used = util_read_varint(buf, &fcdr_deflated_len); 
 
     /* 1024 bytes should always be enough */
-    ptr = malloc(FCDR_MAX_DEFLATED_SZ);
+    ptr = (uint8_t*)malloc(FCDR_MAX_DEFLATED_SZ);
     if (ptr == NULL) {
         printf("ERROR: Malloc failed.\n");
         return -1;
@@ -262,16 +259,18 @@ int director_read_abmp(director_t *director) {
 
     printf("INFO: Inflated Fcdr chunk from %lu to %lu bytes.\n", inflate_stream.total_in, inflate_stream.total_out);
 
+    uint16_t fcdr_entry_count;
+    memcpy(&fcdr_entry_count, ptr, sizeof(uint16_t));
+    fcdr_entry_count = director->endianess == BIG_ENDIAN ? SWAP_INT16(fcdr_entry_count) : fcdr_entry_count;
+    printf("INFO: Number of Fcdr entries: %u.\n", fcdr_entry_count);
+
+    free(ptr);
+
     /* Rewind any unused bytes */
     fseek(director->fptr, -inflate_stream.avail_in, SEEK_CUR);
 
     /* Read ABMP chunk */
-    director_load_compressed_chunk(&cur_chunk, director, ftell(director->fptr));
-
-
-    // return director_load_compressed_chunk(&cur_chunk, director, ftell(director->fptr));
-    return -1;
-
+    return director_load_compressed_chunk(&cur_chunk, director, ftell(director->fptr));
 }
 
 director_t *director_load_file(char *fname) {
