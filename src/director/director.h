@@ -11,7 +11,7 @@
 #include <director/score.h>
 
 #define INFLATE_BUF_SZ       512
-#define FCDR_MAX_DEFLATED_SZ 1024
+#define FCDR_MAX_INFLATED_SZ 1024
 
 typedef struct {
     FILE *fptr;

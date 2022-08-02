@@ -20,7 +20,7 @@ int renderer_test() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // Create a GLFWwindow object that we can use for GLFW's functions
+    /* Create a GLFWwindow object that we can use for GLFW's functions */
     GLFWwindow* window = glfwCreateWindow(640, 480, "SWave GL Test", NULL, NULL);
     glfwMakeContextCurrent(window);
     if (window == NULL)
@@ -30,7 +30,7 @@ int renderer_test() {
         return -1;
     }
 
-    // Set the required callback functions
+    /* Set the required callback function */
     glfwSetKeyCallback(window, renderer_key_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -40,29 +40,28 @@ int renderer_test() {
     }
 
 
-    // Define the viewport dimensions
+    /* Define the viewport dimensions (dimensions from movie?) */
     glViewport(0, 0, 640, 480);
 
     int major, minor, rev;
     glfwGetVersion(&major, &minor, &rev);
     printf("INFO: GLFW verison is %i.%i.%i\n", major, minor, rev);
 
-    // Game loop
+    /* Main render loop */
     while (!glfwWindowShouldClose(window))
     {
-        // Check if any events have been activated (key pressed, mouse moved etc.) and call corresponding response functions
+        /* Check if any events have been activated (key pressed, mouse moved etc.) and call corresponding response functions */
         glfwPollEvents();
 
-        // Render
-        // Clear the colorbuffer
+        /* Clear the buffer */
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Swap the screen buffers
+        /* Swap the screen buffer */
         glfwSwapBuffers(window);
     }
 
-    // Terminates GLFW, clearing any resources allocated by GLFW.
+    /* Terminates GLFW, clearing any resources allocated by GLFW */
     glfwTerminate();
     return 0;
 }

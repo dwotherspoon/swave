@@ -58,6 +58,9 @@ int director_load_compressed_chunk(director_chunk_t *chunk, director_t *director
 
     /* First read var int uncompressed length */
     sz_read = fread(buf, 1, INFLATE_BUF_SZ, director->fptr);
+
+    /* Should we error here? What if last chunk is smaller than buffer size? */
+
     sz_used = util_read_varint(buf, &deflated_len); 
     sz_used += util_read_varint(buf + sz_used, &compression_type); 
     sz_used += util_read_varint(buf + sz_used, &inflated_len);
@@ -107,7 +110,7 @@ int director_load_compressed_chunk(director_chunk_t *chunk, director_t *director
     return 0;
 }
 
-int diretor_read_mmap(director_t *director) {
+int director_read_mmap(director_t *director) {
     director_chunk_t cur_chunk;
 
     /* Read and process imap chunk (comes next) */
@@ -221,7 +224,7 @@ int director_read_abmp(director_t *director) {
     sz_used = util_read_varint(buf, &fcdr_deflated_len); 
 
     /* 1024 bytes should always be enough */
-    ptr = (uint8_t*)malloc(FCDR_MAX_DEFLATED_SZ);
+    ptr = (uint8_t*)malloc(FCDR_MAX_INFLATED_SZ);
     if (ptr == NULL) {
         printf("ERROR: Malloc failed.\n");
         return -1;
@@ -231,7 +234,7 @@ int director_read_abmp(director_t *director) {
     inflate_stream.zfree = Z_NULL;
     inflate_stream.opaque = Z_NULL;
 
-    inflate_stream.avail_out = FCDR_MAX_DEFLATED_SZ;
+    inflate_stream.avail_out = FCDR_MAX_INFLATED_SZ;
     inflate_stream.next_out = ptr;
 
     inflate_stream.avail_in = sz_read - sz_used;
@@ -251,6 +254,7 @@ int director_read_abmp(director_t *director) {
         }
         inflate_result = inflate(&inflate_stream, Z_NO_FLUSH);
         if (inflate_result < 0) {
+            printf("ERROR: Failed to inflate Fcdr chunk.\n");
             return -1;
         }
     } while (inflate_result != Z_STREAM_END);
@@ -263,6 +267,8 @@ int director_read_abmp(director_t *director) {
     memcpy(&fcdr_entry_count, ptr, sizeof(uint16_t));
     fcdr_entry_count = director->endianess == BIG_ENDIAN ? SWAP_INT16(fcdr_entry_count) : fcdr_entry_count;
     printf("INFO: Number of Fcdr entries: %u.\n", fcdr_entry_count);
+
+    /* TODO: Prase Fcdr information and store it somewhere? */
 
     free(ptr);
 
@@ -308,7 +314,7 @@ director_t *director_load_file(char *fname) {
     printf("Type FourCC: %.*s (%x), length of file: %u\n", 4, result->codec.str, result->codec.val, result->length);
 
     if (result->codec.val == FOURCC_MV93 && result->codec.val != FOURCC_MC95) {
-        if (diretor_read_mmap(result) != 0) {
+        if (director_read_mmap(result) != 0) {
             printf("ERROR: Failed reading uncompressed file.\n");
             return NULL;
         }
